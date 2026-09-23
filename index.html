@@ -38,7 +38,11 @@ input,select{font-family:inherit;font-size:20px;-webkit-user-select:text;user-se
 .signboard{border-bottom:10px solid var(--loc);padding:22px 24px 16px;text-align:center}
 .signboard h1{margin:0;font-size:clamp(34px,6vw,54px);letter-spacing:.08em}
 .signboard .en{color:var(--sub);font-size:16px;margin-top:4px}
-.mis{padding:18px 26px;font-size:21px;line-height:2.1}
+.lvsel{padding:16px 22px 0;text-align:center}
+.lvt{font-size:19px;color:var(--sub);line-height:1.9;margin-bottom:6px}
+.lvbtns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.lvbtns button{font-size:22px;min-height:64px;padding:6px 22px}
+.mis{padding:14px 26px 18px;font-size:21px;line-height:2.1}
 .mis .k{display:inline-block;min-width:7em;color:var(--sub)}
 .startbtns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;padding:0 20px 22px}
 .huge{font-size:30px;min-height:76px;padding:8px 48px}
@@ -102,8 +106,9 @@ body.paused #pauseChip{display:block}
 .tt-hd{min-height:0;position:sticky;top:0;background:#f5f8fb;z-index:1;font-size:15px;color:var(--sub)}
 .tt-hd .tt-h,.tt-hd .tt-ms{padding:4px 8px}
 .tt-h{width:62px;flex:none;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;background:#f5f8fb;border-right:2px solid var(--line)}
-.tt-ms{flex:1;display:flex;flex-wrap:wrap;gap:8px;padding:6px 8px;align-items:center}
-.tt-m{min-width:62px;height:58px;padding:0 6px;font-size:26px;color:var(--ink);border:2px solid #9aa7b6;background:#fff;display:inline-flex;align-items:center;justify-content:center;gap:2px}
+.tt-ms{flex:1;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;padding:6px 8px;align-items:center}
+.tt-hd .tt-ms{display:block}
+.tt-m{width:100%;max-width:100px;min-width:0;height:58px;padding:0 4px;font-size:26px;color:var(--ink);border:2px solid #9aa7b6;background:#fff;display:inline-flex;align-items:center;justify-content:center;gap:2px}
 .tt-m.express{border-color:var(--exp);background:var(--exp-l)}
 .tt-k{font-size:15px;color:#fff;background:var(--exp);border-radius:6px;padding:0 4px;line-height:1.7;margin-right:3px}
 .tt-k rt{color:var(--ink)}
@@ -180,21 +185,23 @@ body.paused #pauseChip{display:block}
 <!-- スタート画面 -->
 <section id="scr-start" class="screen on">
   <div class="startcard">
-    <div class="signboard"><h1 id="ttl"></h1><div class="en">Densha de Odekake</div></div>
+    <div class="signboard"><h1 id="ttl"></h1></div>
+    <div class="lvsel"><div id="lvTitle" class="lvt"></div><div id="lvBtns" class="lvbtns"></div></div>
     <div id="stMission" class="mis"></div>
     <div class="startbtns">
       <button id="bStart" class="primary huge"></button>
     </div>
     <div class="startbtns">
+      <button id="bReroll"></button>
       <button id="bSound"></button>
-      <button id="bSet" class="gear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>先生用の設定</span></button>
+      <button id="bSet" class="gear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span><ruby>設定<rt>せってい</rt></ruby></span></button>
     </div>
   </div>
 </section>
 
 <!-- 設定画面（教員用） -->
 <section id="scr-settings" class="screen">
-  <div class="sethead"><h2>先生用の設定</h2><button id="bReset">初期値にもどす</button><button id="bSetBack" class="primary">もどる</button></div>
+  <div class="sethead"><h2>設定</h2><button id="bReset">初期値にもどす</button><button id="bSetBack" class="primary">もどる</button></div>
   <div id="setBody"></div>
 </section>
 
@@ -250,7 +257,7 @@ body.paused #pauseChip{display:block}
 /* ================= 基本 ================= */
 const N = 7;
 const FONT = '"BIZ UDPGothic", sans-serif';
-const KEY = 'densha-odekake-v1';
+const KEY = 'densha-odekake-v2';
 const $ = s => document.querySelector(s);
 const RE_R = /\{([^|{}]+)\|([^{}]+)\}/g;
 const rb = s => String(s).replace(RE_R, '<ruby>$1<rt>$2</rt></ruby>');
@@ -264,16 +271,16 @@ function fmt(t){
 }
 
 const LV = {oneway:'一方のみ', updown:'上下線あり', express:'急行もあり'};
-const PRESETS = {oneway:{step:5,headway:10,seg:5}, updown:{step:1,headway:8,seg:3}, express:{step:1,headway:8,seg:3}};
+const PRESETS = {oneway:{step:5,headway:10,seg:5}, updown:{step:1,headway:10,seg:3}, express:{step:1,headway:10,seg:3}};
 const DEFAULTS = {
   level:'updown',
   names:['みなと','はまべ','ひかり','なかまち','あおば','ひまわり','やまて'],
-  home:3, dest:5, expressStops:[0,2,3,6],
-  startH:9, startM:0, goalOn:false, goalH:9, goalM:40,
-  errandText:'としょかんで ほんを かえす', errandMin:30,
-  step:1, headway:8, seg:3,
-  secPerMin:3, dwell:7, guideDelay:4, seed:1,
-  sound:true, startPaused:true
+  home:3, dest:5, destRandom:true, expressStops:[0,2,3,6],
+  startRandom:true, startH:9, startM:0, goalOn:false, goalAfter:40,
+  errandRandom:true, errandText:'としょかんで ほんを かえす', errandMin:30,
+  step:1, headway:10, seg:3,
+  secPerMin:3, dwell:5, guideDelay:3, seed:1,
+  sound:true, startPaused:false
 };
 function defCfg(){ return JSON.parse(JSON.stringify(DEFAULTS)); }
 function loadCfg(){
@@ -290,6 +297,24 @@ function loadCfg(){
 }
 function saveCfg(){ try{ localStorage.setItem(KEY, JSON.stringify(cfg)); }catch(e){} }
 let cfg = loadCfg();
+
+const ERRANDS = [
+  ['としょかんで ほんを かえす',20],['としょかんで ほんを かりる',30],['ゆうびんきょくで てがみを だす',15],
+  ['スーパーで かいものを する',40],['パンやさんで パンを かう',15],['ぎんこうで おかねを おろす',20],
+  ['くつやさんで くつを かう',30],['びよういんで かみを きる',45],['こうえんで さんぽを する',50],
+  ['プールで およぐ',90],['はいしゃさんに いく',60],['ほんやさんで ほんを さがす',30]
+];
+let RUN = null;
+function destCands(){ return [cfg.home - 2, cfg.home + 2].filter(i => i >= 0 && i < N); }
+function rollRun(){
+  const start = cfg.startRandom ? (8 + Math.floor(Math.random() * 9)) * 60 + Math.floor(Math.random() * 60) : cfg.startH*60 + cfg.startM;
+  let dest = cfg.dest;
+  if(cfg.destRandom){ const c = destCands(); if(c.length) dest = c[Math.floor(Math.random() * c.length)]; }
+  if(dest === cfg.home) dest = destCands()[0];
+  const e = cfg.errandRandom ? ERRANDS[Math.floor(Math.random() * ERRANDS.length)] : [cfg.errandText, cfg.errandMin];
+  RUN = {start, dest, errText:e[0], errMin:e[1]};
+}
+const goalTime = () => RUN.start + cfg.goalAfter;
 
 const nm = i => esc(cfg.names[i]);
 const termName = dir => dir > 0 ? nm(N-1) : nm(0);
@@ -336,13 +361,19 @@ function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.im
 function buildTrains(){
   const rnd = mulberry32(cfg.seed * 7919 + 101);
   const st = Math.max(1, cfg.step), H = Math.max(st, cfg.headway);
-  const start = cfg.startH * 60 + cfg.startM, lo = start - 150, hi = start + 600;
+  const start = RUN.start, lo = start - 150, hi = start + 600;
   const J = Math.max(st < H ? 1 : 0, Math.floor(H / (3 * st)));
+  // どの時間帯でも、1時間に6本まで（急行ありは少しよゆうをとる）
+  const need = cfg.level === 'express' ? 66 : 61;
   const series = () => {
     const a = []; let t = Math.ceil((lo + Math.floor(rnd() * H)) / st) * st;
-    while(t < hi){ a.push(t); const g = H + (J > 0 ? (Math.floor(rnd() * (2*J+1)) - J) * st : 0); t += Math.max(st, g); }
+    while(t < hi){
+      if(a.length >= 6 && t - a[a.length-6] < need) t = Math.ceil((a[a.length-6] + need) / st) * st;
+      a.push(t); const g = H + (J > 0 ? (Math.floor(rnd() * (2*J+1)) - J) * st : 0); t += Math.max(st, g);
+    }
     return a;
   };
+  const limit6 = arr => { const o = []; arr.forEach(t => { if(o.length < 6 || t - o[o.length-6] >= need) o.push(t); }); return o; };
   const down = series(); let up = series();
   if(cfg.level !== 'oneway'){
     // ときどき上りと下りが同じ時刻に来るようにする
@@ -367,9 +398,9 @@ function buildTrains(){
       if(!u2.length || u - u2[u2.length-1] >= minGap) u2.push(u);
       else if(u === forced){ u2[u2.length-1] = u; }
     });
-    up = u2;
+    up = limit6(u2);
   }
-  const goDir = Math.sign(cfg.dest - cfg.home) || 1;
+  const goDir = Math.sign(RUN.dest - cfg.home) || 1;
   const types = {};
   types[1] = down.map(() => 'local'); types[-1] = up.map(() => 'local');
   if(cfg.level === 'express'){
@@ -412,8 +443,8 @@ function showScreen(n){
 
 function startGame(){
   G = {
-    trains: buildTrains(), time: cfg.startH*60 + cfg.startM,
-    phase:'go', station:cfg.home, target:cfg.dest, view:'',
+    trains: buildTrains(), time: RUN.start,
+    phase:'go', station:cfg.home, target:RUN.dest, view:'',
     paused: !!cfg.startPaused, fast:false, selected:null, handled:new Set(),
     log:[], miss:0, boards:0, timers:[], plat:null, ride:null,
     npcs:[], player:null, errand:null, arrGo:null, lastMin:-1
@@ -444,7 +475,7 @@ function setView(v){
 }
 
 function renderMission(){
-  const goal = cfg.goalH*60 + cfg.goalM;
+  const goal = goalTime();
   let s = `${G.phase === 'go' ? '{行|い}き' : '{帰|かえ}り'}：<b>${nm(G.target)}{駅|えき}</b>へ {行|い}こう`;
   if(G.phase === 'go' && cfg.goalOn) s += `<span class="goal">${fmt(goal)}までに つきたい</span>`;
   if(G.view === 'ride') s += `<div class="sub">{今|いま}は {電車|でんしゃ}の なか</div>`;
@@ -556,7 +587,6 @@ function renderPlatformLabels(){
     const lbl = $(side === 'top' ? '#lblTop' : '#lblBot');
     const used = ds.includes(dir) && (dir > 0 ? S < N-1 : S > 0);
     lbl.innerHTML = used ? rb(panelHeader(dir, S)) : '';
-    lbl.classList.toggle('sel', !!(used && sel && sel.train.dir === dir));
     $(side === 'top' ? '#statTop' : '#statBot').innerHTML = '';
     const b = $(side === 'top' ? '#boardTop' : '#boardBot');
     b.innerHTML = rb('この {電車|でんしゃ}に のる');
@@ -781,7 +811,15 @@ function doAlight(){
   if(s === G.target){
     sfx('ok');
     if(G.phase === 'go') arriveGo(); else finish();
-  }else enterStation(s, t);
+  }else{
+    const tg = G.target;
+    const early = (tg - s) * t.dir > 0 && t.stops[tg];
+    enterStation(s, t);
+    if(early){
+      addLog('miss', `${nm(tg)}{駅|えき}より {前|まえ}の ${nm(s)}{駅|えき}で おりた`); G.miss++;
+      after(cfg.guideDelay, () => { if(G && G.view === 'station' && G.station === s) showGuide('early'); });
+    }
+  }
 }
 $('#bAlight').addEventListener('click', () => { if(G) doAlight(); });
 
@@ -810,21 +848,21 @@ function syncRideUI(){
 /* ================= 用事 ================= */
 function arriveGo(){
   G.arrGo = G.time;
-  addLog('goal', `${nm(cfg.dest)}{駅|えき}に ついた`);
+  addLog('goal', `${nm(RUN.dest)}{駅|えき}に ついた`);
   G.errand = {state:'arrived'};
   setView('errand'); renderErrand();
 }
 function renderErrand(){
-  const E = G.errand, goal = cfg.goalH*60 + cfg.goalM;
+  const E = G.errand, goal = goalTime();
   let msg = '', btn = '';
   if(E.state === 'arrived'){
-    msg = `${nm(cfg.dest)}{駅|えき}に ついたよ！　{今|いま}は ${fmt(G.time)}。`;
+    msg = `${nm(RUN.dest)}{駅|えき}に ついたよ！　{今|いま}は ${fmt(G.time)}。`;
     if(cfg.goalOn){
       msg += G.time <= goal + 1e-9
         ? `<br>${fmt(goal)}までに つけたね。`
         : `<br>${fmt(goal)}より おそく なっちゃったね。つぎは もっと {早|はや}い {電車|でんしゃ}を えらんでみよう。`;
     }
-    msg += `<br>{用事|ようじ}：${esc(cfg.errandText)}`;
+    msg += `<br>{用事|ようじ}：${esc(RUN.errText)}`;
     btn = '{用事|ようじ}を する';
   }else if(E.state === 'doing'){
     msg = '{用事|ようじ}を しているよ…';
@@ -839,18 +877,18 @@ $('#bErrand').addEventListener('click', () => {
   if(!G || !G.errand) return;
   const E = G.errand;
   if(E.state === 'arrived'){
-    Object.assign(E, {state:'doing', from:G.time, to:G.time + cfg.errandMin, p:0});
+    Object.assign(E, {state:'doing', from:G.time, to:G.time + RUN.errMin, p:0});
     renderErrand();
   }else if(E.state === 'done'){
     G.errand = null; G.phase = 'back'; G.target = cfg.home;
-    enterStation(cfg.dest, null);
+    enterStation(RUN.dest, null);
   }
 });
 function updateErrand(dt){
   const E = G.errand; if(!E || E.state !== 'doing') return;
   E.p = Math.min(1, E.p + dt / 3);
   G.time = E.from + (E.to - E.from) * E.p;
-  if(E.p >= 1){ E.state = 'done'; addLog('ok', `{用事|ようじ}を した（${esc(cfg.errandText)}）`); renderErrand(); }
+  if(E.p >= 1){ E.state = 'done'; addLog('ok', `{用事|ようじ}を した（${esc(RUN.errText)}）`); renderErrand(); }
 }
 
 /* ================= 結果 ================= */
@@ -859,9 +897,9 @@ function finish(){
   showScreen('result'); renderResult();
 }
 function renderResult(){
-  const goal = cfg.goalH*60 + cfg.goalM;
+  const goal = goalTime();
   $('#resTitle').innerHTML = rb('おかえり！');
-  let h = `<div class="sum">${rb(`${nm(cfg.dest)}{駅|えき}に ついた {時刻|じこく}：${fmt(G.arrGo)}`)}`;
+  let h = `<div class="sum">${rb(`${nm(RUN.dest)}{駅|えき}に ついた {時刻|じこく}：${fmt(G.arrGo)}`)}`;
   if(cfg.goalOn) h += rb(G.arrGo <= goal + 1e-9 ? `（${fmt(goal)}までに つけたね）` : `（${fmt(goal)}より おそかったね）`);
   h += `<br>${rb(`${nm(cfg.home)}{駅|えき}に もどった {時刻|じこく}：${fmt(G.time)}`)}`;
   h += `<br>${rb(`のった {電車|でんしゃ}：${G.boards}{本|ほん}`)}</div>`;
@@ -874,7 +912,7 @@ function renderResult(){
   $('#bHome').innerHTML = rb('はじめの {画面|がめん}へ');
 }
 $('#bAgain').addEventListener('click', () => startGame());
-$('#bHome').addEventListener('click', () => { G = null; renderStart(); showScreen('start'); });
+$('#bHome').addEventListener('click', () => { G = null; rollRun(); renderStart(); showScreen('start'); });
 
 /* ================= 案内・モーダル ================= */
 const GUIDES = {
@@ -893,6 +931,9 @@ const GUIDES = {
   over: () => ({
     q:`あれ？ ${nm(G.target)}{駅|えき}を {出|で}ちゃったよ。どうしたら いいかな？`,
     a:'つぎに とまる {駅|えき}で おりて、もどる {電車|でんしゃ}に のろう。'}),
+  early: () => ({
+    q:`あれ？ ここは ${nm(G.station)}{駅|えき}だよ。${nm(G.target)}{駅|えき}は まだ {先|さき}だね。どうしたら いいかな？`,
+    a:`{時刻表|じこくひょう}で、${nm(G.target)}{駅|えき}に {行|い}く {電車|でんしゃ}を さがして、もういちど のろう。`}),
   remind: () => ({
     q:`${nm(G.target)}{駅|えき}から はなれているよ。どうしたら いいかな？`,
     a:'つぎに とまる {駅|えき}で「おりる」を おそう。'})
@@ -947,7 +988,7 @@ $('#bFast').addEventListener('click', () => { if(!G) return; G.fast = !G.fast; s
 $('#bQuit').addEventListener('click', () => {
   showModal(rb('はじめの {画面|がめん}に もどる？'), [
     {label: rb('つづける'), fn: hideModal},
-    {label: rb('もどる'), cls:'primary', fn: () => { hideModal(); G = null; renderStart(); showScreen('start'); }}
+    {label: rb('もどる'), cls:'primary', fn: () => { hideModal(); G = null; rollRun(); renderStart(); showScreen('start'); }}
   ]);
 });
 
@@ -1150,27 +1191,30 @@ const hash = i => { const s = Math.sin(i*12.9898 + 78.233) * 43758.5453; return 
 function drawWindow(){
   const {ctx, W, H} = fit($('#winc')); const R = G.ride; if(!R) return;
   const trav = (G.time - R.t.times[R.board]) / segOf(R.t), D = W*1.6, hz = H*0.58;
+  // 下り：景色は左へ流れる（電車は右へ進む）／上り：景色は右へ流れる（電車は左へ進む）
+  const fl = R.t.dir < 0, mx = (x, w) => fl ? W - x - (w || 0) : x;
   ctx.fillStyle = '#d6ebfb'; ctx.fillRect(0, 0, W, hz);
   ctx.fillStyle = '#b7d7a4';
   const ho = ((trav*D*0.1) % (W*0.8) + W*0.8) % (W*0.8);
-  for(let i = -1; i < 3; i++){ ctx.beginPath(); ctx.ellipse(i*W*0.8 - ho + W*0.4, hz, W*0.36, H*0.2, 0, Math.PI, 0); ctx.fill(); }
+  for(let i = -1; i < 3; i++){ ctx.beginPath(); ctx.ellipse(mx(i*W*0.8 - ho + W*0.4), hz, W*0.36, H*0.2, 0, Math.PI, 0); ctx.fill(); }
   ctx.fillStyle = '#cfe6bb'; ctx.fillRect(0, hz, W, H - hz);
   const off = trav*D*0.45, sp = 140, i0 = Math.floor(off/sp) - 1;
   for(let i = i0; i < i0 + Math.ceil(W/sp) + 3; i++){
-    const x = i*sp - off, h = hash(i);
+    const x0 = i*sp - off, h = hash(i);
     if(h < 0.45){
-      const hw = sp*0.55, hh = H*0.14;
+      const hw = sp*0.55, hh = H*0.14, x = mx(x0, hw);
       ctx.fillStyle = h < 0.2 ? '#f6e6c8' : '#e9eef3'; ctx.fillRect(x, hz - hh, hw, hh);
       ctx.fillStyle = h < 0.2 ? '#c0674a' : '#5a7896';
       ctx.beginPath(); ctx.moveTo(x - 6, hz - hh); ctx.lineTo(x + hw/2, hz - hh - H*0.08); ctx.lineTo(x + hw + 6, hz - hh); ctx.closePath(); ctx.fill();
     }else if(h < 0.8){
+      const x = mx(x0 + 17) - 17;
       ctx.fillStyle = '#7a5b3f'; ctx.fillRect(x + 14, hz - H*0.08, 7, H*0.08);
       ctx.fillStyle = '#5f9e58'; ctx.beginPath(); ctx.arc(x + 17, hz - H*0.12, H*0.07, 0, Math.PI*2); ctx.fill();
     }
   }
   const list = [R.board, ...R.seq];
   list.forEach((s, k) => {
-    const cx = W/2 + (k - trav) * D;
+    const cx = mx(W/2 + (k - trav) * D);
     if(cx < -W || cx > 2*W) return;
     ctx.fillStyle = '#d8d3c7'; ctx.fillRect(cx - W*0.75, H*0.74, W*1.5, H*0.26);
     ctx.fillStyle = '#f0c030'; ctx.fillRect(cx - W*0.75, H*0.76, W*1.5, H*0.02);
@@ -1184,7 +1228,7 @@ function drawWindow(){
   });
   const po = trav*D*1.25, ps = W*0.55, j0 = Math.floor(po/ps) - 1;
   ctx.fillStyle = '#5d6572';
-  for(let j = j0; j < j0 + 4; j++){ const x = j*ps - po; ctx.fillRect(x, H*0.05, 8, H*0.7); }
+  for(let j = j0; j < j0 + 4; j++){ const x = mx(j*ps - po, 8); ctx.fillRect(x, H*0.05, 8, H*0.7); }
   ctx.strokeStyle = '#5d6572'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, H*0.08); ctx.lineTo(W, H*0.08); ctx.stroke();
   // 窓わく
   ctx.strokeStyle = '#46505d'; ctx.lineWidth = 16; rr(ctx, 8, 8, W - 16, H - 16, 22); ctx.stroke();
@@ -1218,23 +1262,32 @@ function loop(ts){
 
 /* ================= スタート画面 ================= */
 function renderStart(){
+  if(!RUN) rollRun();
   $('#ttl').innerHTML = rb('{電車|でんしゃ}で おでかけ');
-  const goal = cfg.goalH*60 + cfg.goalM;
-  let s = `<span class="k">レベル</span>${rb(({oneway:'{一方|いっぽう}のみ', updown:'{上下線|じょうげせん}あり', express:'{急行|きゅうこう}もあり'})[cfg.level])}<br>`;
-  s += `<span class="k">${rb('{出発|しゅっぱつ}')}</span>${rb(`${nm(cfg.home)}{駅|えき}`)}<br>`;
-  s += `<span class="k">${rb('{行|い}き{先|さき}')}</span>${rb(`${nm(cfg.dest)}{駅|えき}`)}<br>`;
-  s += `<span class="k">${rb('{用事|ようじ}')}</span>${esc(cfg.errandText)}（${cfg.errandMin}分）<br>`;
-  s += `<span class="k">${rb('{今|いま}の {時刻|じこく}')}</span>${fmt(cfg.startH*60 + cfg.startM)}`;
-  if(cfg.goalOn) s += `<br><span class="k">${rb('めあて')}</span>${rb(`${fmt(goal)}までに ${nm(cfg.dest)}{駅|えき}に つく`)}`;
-  s += `<br>${rb(`${nm(cfg.dest)}{駅|えき}で {用事|ようじ}を すませたら、${nm(cfg.home)}{駅|えき}に もどってこよう。`)}`;
+  $('#lvTitle').innerHTML = rb('レベルを えらんでね');
+  const LVR = {oneway:'{一方|いっぽう}のみ', updown:'{上下線|じょうげせん}あり', express:'{急行|きゅうこう}もあり'};
+  $('#lvBtns').innerHTML = ['oneway','updown','express'].map(k => `<button data-lv="${k}" class="${cfg.level === k ? 'on' : ''}">${rb(LVR[k])}</button>`).join('');
+  $('#bReroll').innerHTML = rb('ほかの じょうけんに する');
+  const goal = goalTime();
+  let s = `<span class="k">${rb('{出発|しゅっぱつ}')}</span>${rb(`${nm(cfg.home)}{駅|えき}`)}<br>`;
+  s += `<span class="k">${rb('{行|い}き{先|さき}')}</span>${rb(`${nm(RUN.dest)}{駅|えき}`)}<br>`;
+  s += `<span class="k">${rb('{用事|ようじ}')}</span>${esc(RUN.errText)}（${RUN.errMin}分）<br>`;
+  s += `<span class="k">${rb('{今|いま}の {時刻|じこく}')}</span>${fmt(RUN.start)}`;
+  if(cfg.goalOn) s += `<br><span class="k">${rb('めあて')}</span>${rb(`${fmt(goal)}までに ${nm(RUN.dest)}{駅|えき}に つく`)}`;
+  s += `<br>${rb(`${nm(RUN.dest)}{駅|えき}で {用事|ようじ}を すませたら、${nm(cfg.home)}{駅|えき}に もどってこよう。`)}`;
   $('#stMission').innerHTML = s;
   $('#bStart').innerHTML = rb('はじめる');
   $('#bSound').innerHTML = rb(cfg.sound ? '{音|おと}：あり' : '{音|おと}：なし');
 }
 $('#bStart').addEventListener('click', () => { unlockAudio(); startGame(); });
+$('#lvBtns').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  cfg.level = b.dataset.lv; Object.assign(cfg, PRESETS[cfg.level]); saveCfg(); renderStart();
+});
+$('#bReroll').addEventListener('click', () => { rollRun(); renderStart(); });
 $('#bSound').addEventListener('click', () => { unlockAudio(); cfg.sound = !cfg.sound; saveCfg(); renderStart(); });
 $('#bSet').addEventListener('click', () => { renderSettings(); showScreen('settings'); });
-$('#bSetBack').addEventListener('click', () => { renderStart(); showScreen('start'); });
+$('#bSetBack').addEventListener('click', () => { rollRun(); renderStart(); showScreen('start'); });
 $('#bReset').addEventListener('click', () => {
   showModal('設定を初期値にもどしますか？', [
     {label:'やめる', fn:hideModal},
@@ -1242,7 +1295,7 @@ $('#bReset').addEventListener('click', () => {
   ]);
 });
 
-/* ================= 設定画面（教員用：ふりがななし） ================= */
+/* ================= 設定画面（ふりがななし） ================= */
 function num(key, min, max, unit){
   return `<div class="num" data-k="${key}" data-min="${min}" data-max="${max}"><input type="number" inputmode="numeric" value="${cfg[key]}"><button class="nb" data-d="1">△</button><button class="nb" data-d="-1">▽</button><span class="unit">${unit || ''}</span></div>`;
 }
@@ -1263,18 +1316,24 @@ function renderSettings(){
     急行もあり：急行は印のついた駅だけにとまります。目的地を通過する急行に乗ることもできます。</p></div>
   <div class="sec"><h3>駅</h3><div class="names">${names}</div>
     <div class="fr"><span class="lb">出発する駅</span><select data-sel="home">${opt(cfg.home)}</select></div>
-    <div class="fr"><span class="lb">行き先（用事の駅）</span><select data-sel="dest">${opt(cfg.dest)}</select></div>
+    <div class="fr"><span class="lb">行き先をランダムにする</span>${tg('destRandom','ランダム')}</div>
+    ${cfg.destRandom ? `<p class="note">出発駅の2つ左か2つ右の駅（初期設定では2番「${esc(cfg.names[1])}」か6番「${esc(cfg.names[5])}」）から、毎回ランダムに決まります。</p>`
+      : `<div class="fr"><span class="lb">行き先（用事の駅）</span><select data-sel="dest">${opt(cfg.dest)}</select></div>`}
     <p class="note">路線図の左はしが上りの終点、右はしが下りの終点です。</p></div>
   ${cfg.level === 'express' ? `<div class="sec"><h3>急行がとまる駅</h3><div class="segs">${ex}</div>
     <p class="note">両はしの駅には必ずとまります。出発駅にとまり、行き先を通過するようにすると「急行の通過」を体験できます。</p></div>` : ''}
   <div class="sec"><h3>時刻</h3>
-    <div class="fr"><span class="lb">はじめの時刻</span>${num('startH',5,22,'時')}${num('startM',0,59,'分')}</div>
+    <div class="fr"><span class="lb">はじめの時刻をランダムにする</span>${tg('startRandom','ランダム')}</div>
+    ${cfg.startRandom ? '<p class="note">8時0分〜16時59分のどこかから、毎回ランダムに始まります。</p>'
+      : `<div class="fr"><span class="lb">はじめの時刻</span>${num('startH',5,22,'時')}${num('startM',0,59,'分')}</div>`}
     <div class="fr"><span class="lb">目標の時刻（行き）</span>${tg('goalOn','目標')}</div>
-    ${cfg.goalOn ? `<div class="fr"><span class="lb">この時刻までに着く</span>${num('goalH',5,23,'時')}${num('goalM',0,59,'分')}</div>` : ''}</div>
+    ${cfg.goalOn ? `<div class="fr"><span class="lb">はじめの時刻から</span>${num('goalAfter',10,180,'分後までに着く')}</div>` : ''}</div>
   <div class="sec"><h3>用事</h3>
-    <div class="fr"><span class="lb">用事の内容</span><input id="errText" type="text" data-txt="errandText" value="${esc(cfg.errandText)}" maxlength="30"></div>
+    <div class="fr"><span class="lb">用事をランダムにする</span>${tg('errandRandom','ランダム')}</div>
+    ${cfg.errandRandom ? `<p class="note">次の中から毎回ランダムに決まります：${ERRANDS.map(e => `${e[0]}（${e[1]}分）`).join('、')}</p>`
+      : `<div class="fr"><span class="lb">用事の内容</span><input id="errText" type="text" data-txt="errandText" value="${esc(cfg.errandText)}" maxlength="30"></div>
     <div class="fr"><span class="lb">用事にかかる時間</span>${num('errandMin',5,180,'分')}</div>
-    <p class="note">用事の内容は画面にそのまま表示されます。ひらがなで書くのがおすすめです。</p></div>
+    <p class="note">用事の内容は画面にそのまま表示されます。ひらがなで書くのがおすすめです。</p>`}</div>
   <div class="sec"><h3>電車と時刻表</h3>
     <div class="fr"><span class="lb">時刻の刻み</span>${num('step',1,15,'分')}</div>
     <div class="fr"><span class="lb">電車の間隔（だいたい）</span>${num('headway',3,30,'分')}</div>
@@ -1325,6 +1384,7 @@ $('#setBody').addEventListener('input', e => {
 });
 
 document.addEventListener('gesturestart', e => e.preventDefault());
+rollRun();
 renderStart();
 requestAnimationFrame(loop);
 </script>

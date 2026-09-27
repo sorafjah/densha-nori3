@@ -113,8 +113,8 @@ body.paused #pauseChip{display:block}
 .tt-m{position:relative}
 .tt-m.past{color:#a3adb9;border-color:#d3d9e0;background:#eef1f4}
 .tt-m.past .tt-k{background:#c4cbd4}
-.tt-m.nowline::before{content:"";position:absolute;left:-7px;top:-4px;bottom:-4px;width:5px;border-radius:3px;background:var(--pri)}
-.tt-m.nowline::after{content:"いま";position:absolute;left:-26px;top:-13px;font-size:13px;line-height:1.5;padding:0 5px;border-radius:6px;background:var(--pri);color:#fff;font-weight:700;z-index:2}
+.nowmark{position:absolute;width:5px;border-radius:3px;background:var(--pri);pointer-events:none;z-index:2}
+.nowmark span{position:absolute;left:50%;top:-14px;transform:translateX(-50%);white-space:nowrap;font-size:13px;line-height:1.5;padding:0 6px;border-radius:6px;background:var(--pri);color:#fff;font-weight:700}
 .tt-row{overflow:visible}
 .tt-k{font-size:15px;color:#fff;background:var(--exp);border-radius:6px;padding:0 4px;line-height:1.7;margin-right:3px}
 .tt-k rt{color:var(--ink)}
@@ -562,17 +562,42 @@ function updateTTMarks(){
   if(m === G.ttMin) return;
   G.ttMin = m;
   document.querySelectorAll('.ttp').forEach(panel => {
-    let first = true;
+    let prev = null, next = null;
     panel.querySelectorAll('.tt-m').forEach(b => {
       const t = G.trains.find(x => x.id === +b.dataset.id);
       const past = t.times[G.station] < m;
       b.classList.toggle('past', cfg.hintPast && past);
-      const nl = cfg.hintNow && !past && first;
-      b.classList.toggle('nowline', nl);
-      if(!past) first = false;
+      if(past) prev = b; else if(!next) next = b;
     });
+    panel._now = {prev, next};
+  });
+  placeNowMarks();
+}
+// 「いま」の線を、出発した電車と次の電車のあいだに置く
+function placeNowMarks(){
+  document.querySelectorAll('.ttp').forEach(panel => {
+    const body = panel.querySelector('.ttp-body'); if(!body) return;
+    let mk = body.querySelector('.nowmark');
+    const nw = panel._now || {};
+    const ref = nw.next || nw.prev;
+    if(!cfg.hintNow || !ref){ if(mk) mk.style.display = 'none'; return; }
+    if(!mk){ mk = document.createElement('div'); mk.className = 'nowmark'; mk.innerHTML = '<span>いま</span>'; body.appendChild(mk); }
+    const br = body.getBoundingClientRect();
+    const rel = r => ({l:r.left - br.left + body.scrollLeft, r:r.right - br.left + body.scrollLeft, t:r.top - br.top + body.scrollTop, h:r.height});
+    let x, box;
+    if(nw.next){
+      const n = rel(nw.next.getBoundingClientRect()); box = n;
+      const sameRow = nw.prev && nw.prev.parentNode === nw.next.parentNode;
+      const leftEdge = sameRow ? rel(nw.prev.getBoundingClientRect()).r : rel(nw.next.parentNode.getBoundingClientRect()).l;
+      x = (leftEdge + n.l) / 2;
+    }else{
+      const pv = rel(nw.prev.getBoundingClientRect()); box = pv;
+      x = pv.r + 12;
+    }
+    Object.assign(mk.style, {display:'block', left:(x - 2.5) + 'px', top:(box.t - 4) + 'px', height:(box.h + 8) + 'px'});
   });
 }
+window.addEventListener('resize', () => { if(G && G.view === 'station') placeNowMarks(); });
 
 function renderStation(){
   const S = G.station;

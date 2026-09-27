@@ -281,7 +281,7 @@ body.paused #pauseChip{display:block}
 /* ================= 基本 ================= */
 const N = 7;
 const FONT = '"BIZ UDPGothic", sans-serif';
-const KEY = 'densha-odekake-v3';
+const KEY = 'densha-odekake-v4';
 const $ = s => document.querySelector(s);
 const RE_R = /\{([^|{}]+)\|([^{}]+)\}/g;
 const rb = s => String(s).replace(RE_R, '<ruby>$1<rt>$2</rt></ruby>');
@@ -295,7 +295,7 @@ function fmt(t){
 }
 
 const LV = {oneway:'一方のみ', updown:'上下線あり', express:'急行もあり'};
-const PRESETS = {oneway:{step:5,headway:15,seg:5,ttHours:2}, updown:{step:1,headway:10,seg:3,ttHours:4}, express:{step:1,headway:10,seg:3,ttHours:4}};
+const PRESETS = {oneway:{step:5,headway:15,seg:5,ttHours:2,hintPast:true,hintNow:true}, updown:{step:1,headway:10,seg:3,ttHours:4,hintPast:false,hintNow:false}, express:{step:1,headway:10,seg:3,ttHours:4,hintPast:false,hintNow:false}};
 const DEFAULTS = {
   level:'updown',
   names:['みなと','はまべ','ひかり','なかまち','あおば','ひまわり','やまて'],
@@ -305,7 +305,7 @@ const DEFAULTS = {
   step:1, headway:10, seg:3, ttHours:4,
   secPerMin:3, dwell:4, guideDelay:2, seed:1,
   sound:true, startPaused:false,
-  hintPast:true, hintNow:false, ttSecPerMin:5
+  hintPast:false, hintNow:false, ttSecPerMin:5
 };
 function defCfg(){ return JSON.parse(JSON.stringify(DEFAULTS)); }
 function loadCfg(){
@@ -1378,7 +1378,7 @@ function renderSettings(){
   const tg = (k, label) => `<button class="${cfg[k] ? 'on' : ''}" data-tg="${k}">${label}：${cfg[k] ? 'ON' : 'OFF'}</button>`;
   $('#setBody').innerHTML = `
   <div class="sec"><h3>レベル</h3><div class="segs">${lv}</div>
-    <p class="note">レベルを選ぶと「時刻の刻み・電車の間隔・となりの駅までの時間」がおすすめ値になります。<br>
+    <p class="note">レベルを選ぶと「時刻の刻み・電車の間隔・となりの駅までの時間・時刻表に出す時間・ヒント」がおすすめ値になります。<br>
     一方のみ：行きは目的地方向、帰りは出発駅方向の電車だけが来ます（上り・下りの表示なし）。<br>
     上下線あり：上り・下りの両方が来ます。同時に来ることもあり、反対方向にも乗れます。<br>
     急行もあり：急行は印のついた駅だけにとまります。目的地を通過する急行に乗ることもできます。</p></div>
@@ -1412,7 +1412,7 @@ function renderSettings(){
   <div class="sec"><h3>ヒント</h3>
     <div class="fr"><span class="lb">出発した時刻を灰色にする</span>${tg('hintPast','灰色')}</div>
     <div class="fr"><span class="lb">時刻表に今の線を引く</span>${tg('hintNow','今の線')}</div>
-    <p class="note">どちらも時刻表の見た目だけが変わります。出発した電車も、今までどおり選ぶことができます。慣れてきたらOFFにしてください。</p></div>
+    <p class="note">どちらも時刻表の見た目だけが変わります。出発した電車も、今までどおり選ぶことができます。慣れてきたらOFFにしてください。<br>レベルを選ぶと、一方のみは両方ON、上下線ありと急行もありは両方OFFになります。</p></div>
   <div class="sec"><h3>すすみかた</h3>
     <div class="fr"><span class="lb">時計の速さ（1分が何秒か）</span>${num('secPerMin',1,20,'秒')}</div>
     ${cfg.level === 'oneway' ? `<div class="fr"><span class="lb">時刻表を見ているときの速さ</span>${num('ttSecPerMin',1,30,'秒')}</div>

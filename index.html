@@ -110,6 +110,12 @@ body.paused #pauseChip{display:block}
 .tt-hd .tt-ms{display:block}
 .tt-m{width:100%;max-width:100px;min-width:0;height:58px;padding:0 4px;font-size:26px;color:var(--ink);border:2px solid #9aa7b6;background:#fff;display:inline-flex;align-items:center;justify-content:center;gap:2px}
 .tt-m.express{border-color:var(--exp);background:var(--exp-l)}
+.tt-m{position:relative}
+.tt-m.past{color:#a3adb9;border-color:#d3d9e0;background:#eef1f4}
+.tt-m.past .tt-k{background:#c4cbd4}
+.tt-m.nowline::before{content:"";position:absolute;left:-7px;top:-4px;bottom:-4px;width:5px;border-radius:3px;background:var(--pri)}
+.tt-m.nowline::after{content:"いま";position:absolute;left:-26px;top:-13px;font-size:13px;line-height:1.5;padding:0 5px;border-radius:6px;background:var(--pri);color:#fff;font-weight:700;z-index:2}
+.tt-row{overflow:visible}
 .tt-k{font-size:15px;color:#fff;background:var(--exp);border-radius:6px;padding:0 4px;line-height:1.7;margin-right:3px}
 .tt-k rt{color:var(--ink)}
 #ttLegend{font-size:16px;color:var(--sub);line-height:1.9}
@@ -134,6 +140,21 @@ body.paused #pauseChip{display:block}
 #winc{width:100%;height:100%;display:block}
 #bAlight{position:absolute;right:26px;top:26px;font-size:32px;min-height:84px;padding:6px 44px;display:none;background:var(--exp);border-color:#b95516;color:#fff}
 
+/* やること */
+#v-brief{overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.brcard{background:#fff;border:2px solid var(--line);border-radius:18px;padding:10px 24px 14px;max-width:760px;width:100%;margin:auto}
+.brt{font-size:26px;font-weight:700;text-align:center;line-height:1.9;border-bottom:6px solid var(--loc);padding-bottom:2px;margin-bottom:2px}
+.brrow{display:flex;align-items:center;gap:14px;padding:2px 4px;border-bottom:1px solid var(--line)}
+.brk{flex:none;width:7em;font-size:20px;color:var(--sub);line-height:1.9}
+.brv{font-size:26px;font-weight:700;line-height:1.75}
+.brv.from{color:var(--pri)}
+.brv.to{color:#b24f10}
+.brmsg{font-size:20px;line-height:1.9;margin:6px 0 8px;text-align:center}
+.brbtn{text-align:center}
+.brbtn .huge{min-height:64px;font-size:26px}
+#modal .brcard{border:none;padding:0}
+#modal .brv{font-size:24px}
+#modal .mcard{max-height:92vh;overflow:auto}
 /* 用事 */
 #v-errand{align-items:center;justify-content:center}
 .ercard{background:#fff;border:2px solid var(--line);border-radius:18px;padding:22px 28px;max-width:720px;width:100%;text-align:center}
@@ -211,9 +232,9 @@ body.paused #pauseChip{display:block}
     <div class="clockbox"><canvas id="aclock"></canvas><div id="dclock"></div></div>
     <div id="mission" class="mission"></div>
     <div class="gbtns">
+      <button id="bBrief"></button>
       <button id="bFast"></button>
       <button id="bPause"></button>
-      <button id="bQuit"></button>
     </div>
   </header>
   <div class="mapwrap"><canvas id="mapc"></canvas></div>
@@ -232,6 +253,9 @@ body.paused #pauseChip{display:block}
     <div id="v-ride" class="view">
       <div class="ridehead"><div id="rideNext"></div><div id="rideInfo"></div></div>
       <div class="winwrap"><canvas id="winc"></canvas><button id="bAlight"></button></div>
+    </div>
+    <div id="v-brief" class="view">
+      <div class="brcard"><div id="brBody"></div><div class="brbtn"><button id="bBriefGo" class="primary huge"></button></div></div>
     </div>
     <div id="v-errand" class="view">
       <div class="ercard"><div id="erMsg"></div><button id="bErrand" class="primary huge"></button></div>
@@ -257,7 +281,7 @@ body.paused #pauseChip{display:block}
 /* ================= 基本 ================= */
 const N = 7;
 const FONT = '"BIZ UDPGothic", sans-serif';
-const KEY = 'densha-odekake-v2';
+const KEY = 'densha-odekake-v3';
 const $ = s => document.querySelector(s);
 const RE_R = /\{([^|{}]+)\|([^{}]+)\}/g;
 const rb = s => String(s).replace(RE_R, '<ruby>$1<rt>$2</rt></ruby>');
@@ -271,16 +295,17 @@ function fmt(t){
 }
 
 const LV = {oneway:'一方のみ', updown:'上下線あり', express:'急行もあり'};
-const PRESETS = {oneway:{step:5,headway:10,seg:5}, updown:{step:1,headway:10,seg:3}, express:{step:1,headway:10,seg:3}};
+const PRESETS = {oneway:{step:5,headway:15,seg:5,ttHours:2}, updown:{step:1,headway:10,seg:3,ttHours:4}, express:{step:1,headway:10,seg:3,ttHours:4}};
 const DEFAULTS = {
   level:'updown',
   names:['みなと','はまべ','ひかり','なかまち','あおば','ひまわり','やまて'],
   home:3, dest:5, destRandom:true, expressStops:[0,2,3,6],
   startRandom:true, startH:9, startM:0, goalOn:false, goalAfter:40,
   errandRandom:true, errandText:'としょかんで ほんを かえす', errandMin:30,
-  step:1, headway:10, seg:3,
-  secPerMin:3, dwell:5, guideDelay:3, seed:1,
-  sound:true, startPaused:false
+  step:1, headway:10, seg:3, ttHours:4,
+  secPerMin:3, dwell:4, guideDelay:2, seed:1,
+  sound:true, startPaused:false,
+  hintPast:true, hintNow:false, ttSecPerMin:5
 };
 function defCfg(){ return JSON.parse(JSON.stringify(DEFAULTS)); }
 function loadCfg(){
@@ -307,7 +332,8 @@ const ERRANDS = [
 let RUN = null;
 function destCands(){ return [cfg.home - 2, cfg.home + 2].filter(i => i >= 0 && i < N); }
 function rollRun(){
-  const start = cfg.startRandom ? (8 + Math.floor(Math.random() * 9)) * 60 + Math.floor(Math.random() * 60) : cfg.startH*60 + cfg.startM;
+  let start = cfg.startRandom ? (8 + Math.floor(Math.random() * 9)) * 60 + Math.floor(Math.random() * 60) : cfg.startH*60 + cfg.startM;
+  if(cfg.startRandom && cfg.step >= 5) start = Math.floor(start / cfg.step) * cfg.step;
   let dest = cfg.dest;
   if(cfg.destRandom){ const c = destCands(); if(c.length) dest = c[Math.floor(Math.random() * c.length)]; }
   if(dest === cfg.home) dest = destCands()[0];
@@ -451,8 +477,29 @@ function startGame(){
   };
   showScreen('game'); setPauseUI(); setFastUI();
   addLog('ok', `${nm(cfg.home)}{駅|えき}から スタート`);
-  enterStation(cfg.home, null);
+  G.station = cfg.home;
+  setView('brief');
+  $('#brBody').innerHTML = briefHTML(true);
+  $('#bBriefGo').innerHTML = rb('{時刻表|じこくひょう}を {見|み}る');
 }
+
+function briefHTML(first){
+  const row = (k, v, cls) => `<div class="brrow"><div class="brk">${rb(k)}</div><div class="brv ${cls || ''}">${rb(v)}</div></div>`;
+  let h = `<div class="brt">${rb('やること')}</div>`;
+  if(first) h += row('{今|いま}の {時刻|じこく}', fmt(RUN.start));
+  h += row('{出発|しゅっぱつ}する {駅|えき}', `${nm(cfg.home)}{駅|えき}`, 'from');
+  h += row('{行|い}き{先|さき}', `${nm(RUN.dest)}{駅|えき}`, 'to');
+  h += row('{用事|ようじ}', esc(RUN.errText));
+  h += row('{用事|ようじ}の {時間|じかん}', `${RUN.errMin}分`);
+  if(cfg.goalOn) h += row('{目標|もくひょう}', `${fmt(goalTime())}までに つく`);
+  h += `<div class="brmsg">${rb(`${nm(cfg.home)}{駅|えき}から ${nm(RUN.dest)}{駅|えき}へ {行|い}って、{用事|ようじ}を すませたら、${nm(cfg.home)}{駅|えき}に もどってこよう。`)}</div>`;
+  return h;
+}
+$('#bBriefGo').addEventListener('click', () => { if(G) enterStation(cfg.home, null); });
+$('#bBrief').addEventListener('click', () => {
+  if(!G) return;
+  showModal(`<div class="brcard">${briefHTML(false)}</div>`, [{label: rb('とじる'), cls:'primary', fn: hideModal}]);
+});
 
 function addLog(kind, text){ G.log.push({time:G.time, kind, text}); }
 function after(sec, fn){ G.timers.push({t:sec, fn}); }
@@ -462,7 +509,9 @@ function runTimers(dt){
   due.forEach(f => f());
 }
 function advance(dt, capT){
-  const rate = (G.fast ? 5 : 1) / cfg.secPerMin;
+  // 一方のみ：時刻表をえらんでいるあいだだけ、時計をゆっくりにする
+  const spm = (cfg.level === 'oneway' && G.view === 'station') ? cfg.ttSecPerMin : cfg.secPerMin;
+  const rate = (G.fast ? 5 : 1) / spm;
   let nt = G.time + dt * rate;
   if(capT !== undefined && nt > capT && G.time <= capT) nt = capT;
   G.time = nt;
@@ -470,7 +519,7 @@ function advance(dt, capT){
 
 function setView(v){
   G.view = v;
-  ['station','platform','ride','errand'].forEach(k => $('#v-'+k).classList.toggle('on', k === v));
+  ['brief','station','platform','ride','errand'].forEach(k => $('#v-'+k).classList.toggle('on', k === v));
   renderMission();
 }
 
@@ -507,18 +556,38 @@ function panelHeader(dir, S){
     : `<span class="chip">2ばんせん</span>{下|くだ}り　${termName(dir)} ゆき →`;
 }
 
+// ヒント：出発した時刻を灰色に・今の位置に線
+function updateTTMarks(){
+  const m = Math.floor(G.time + 1e-6);
+  if(m === G.ttMin) return;
+  G.ttMin = m;
+  document.querySelectorAll('.ttp').forEach(panel => {
+    let first = true;
+    panel.querySelectorAll('.tt-m').forEach(b => {
+      const t = G.trains.find(x => x.id === +b.dataset.id);
+      const past = t.times[G.station] < m;
+      b.classList.toggle('past', cfg.hintPast && past);
+      const nl = cfg.hintNow && !past && first;
+      b.classList.toggle('nowline', nl);
+      if(!past) first = false;
+    });
+  });
+}
+
 function renderStation(){
   const S = G.station;
   $('#stTitle').innerHTML = rb(`${nm(S)}{駅|えき}の {時刻表|じこくひょう}`);
   $('#stHint').innerHTML = rb('のりたい {電車|でんしゃ}の {時刻|じこく}を おしてね');
   const dirs = dirsAt(S).filter(d => d > 0 ? S < N-1 : S > 0);
-  const h0 = Math.floor(G.time / 60) - 1;
+  const hc = Math.floor(G.time / 60), rows = clamp(cfg.ttHours, 1, 6);
+  const h0 = rows >= 3 ? hc - 1 : hc;
+  G.ttHour = hc;
   let html = '';
   dirs.forEach(dir => {
     const list = G.trains.filter(t => t.dir === dir && t.stops[S]).sort((a,b) => a.times[S] - b.times[S]);
     html += `<div class="ttp"><div class="ttp-h">${rb(panelHeader(dir, S))}</div><div class="ttp-body">`;
     html += `<div class="tt-row tt-hd"><div class="tt-h">時</div><div class="tt-ms">分</div></div>`;
-    for(let h = h0; h <= h0 + 4; h++){
+    for(let h = h0; h < hc + rows; h++){
       const ts = list.filter(t => Math.floor(t.times[S] / 60) === h);
       html += `<div class="tt-row" data-h="${h}"><div class="tt-h">${((h%24)+24)%24}</div><div class="tt-ms">`;
       html += ts.map(t => {
@@ -538,8 +607,9 @@ function renderStation(){
     lg = rb(`{上|のぼ}りは ${nm(0)}の ほうへ、{下|くだ}りは ${nm(N-1)}の ほうへ {行|い}くよ`);
   }
   $('#ttLegend').innerHTML = lg;
+  G.ttMin = -1; updateTTMarks();
   document.querySelectorAll('.ttp-body').forEach(b => {
-    const row = b.querySelector(`.tt-row[data-h="${h0+1}"]`);
+    const row = b.querySelector(`.tt-row[data-h="${hc}"]`);
     const hd = b.querySelector('.tt-hd');
     if(row) b.scrollTop = row.offsetTop - (hd ? hd.offsetHeight : 0);
   });
@@ -983,14 +1053,8 @@ function setFastUI(){
   b.classList.toggle('on', G.fast);
 }
 $('#bPause').addEventListener('click', () => { if(!G) return; G.paused = !G.paused; setPauseUI(); });
-$('#bQuit').innerHTML = rb('やめる');
+$('#bBrief').innerHTML = rb('やること');
 $('#bFast').addEventListener('click', () => { if(!G) return; G.fast = !G.fast; setFastUI(); });
-$('#bQuit').addEventListener('click', () => {
-  showModal(rb('はじめの {画面|がめん}に もどる？'), [
-    {label: rb('つづける'), fn: hideModal},
-    {label: rb('もどる'), cls:'primary', fn: () => { hideModal(); G = null; rollRun(); renderStart(); showScreen('start'); }}
-  ]);
-});
 
 /* ================= 描画 ================= */
 function fit(c){
@@ -1241,13 +1305,17 @@ function drawWindow(){
 let lastTs = 0;
 function update(dt){
   runTimers(dt);
-  if(G.view === 'station') advance(dt);
+  if(G.view === 'station'){
+    advance(dt);
+    if(Math.floor(G.time / 60) !== G.ttHour && !$('#modal').classList.contains('on')) renderStation();
+  }
   else if(G.view === 'platform'){ updatePlatform(dt); if(G.view === 'platform') updatePeople(dt); }
   else if(G.view === 'ride') updateRide(dt);
   else if(G.view === 'errand') updateErrand(dt);
 }
 function render(){
   drawAClock(); updateDClock(); drawMap();
+  if(G.view === 'station') updateTTMarks();
   if(G.view === 'platform'){ drawPlatform(); syncPlatformUI(); }
   else if(G.view === 'ride'){ drawWindow(); syncRideUI(); }
 }
@@ -1273,7 +1341,7 @@ function renderStart(){
   s += `<span class="k">${rb('{行|い}き{先|さき}')}</span>${rb(`${nm(RUN.dest)}{駅|えき}`)}<br>`;
   s += `<span class="k">${rb('{用事|ようじ}')}</span>${esc(RUN.errText)}（${RUN.errMin}分）<br>`;
   s += `<span class="k">${rb('{今|いま}の {時刻|じこく}')}</span>${fmt(RUN.start)}`;
-  if(cfg.goalOn) s += `<br><span class="k">${rb('めあて')}</span>${rb(`${fmt(goal)}までに ${nm(RUN.dest)}{駅|えき}に つく`)}`;
+  if(cfg.goalOn) s += `<br><span class="k">${rb('{目標|もくひょう}')}</span>${rb(`${fmt(goal)}までに ${nm(RUN.dest)}{駅|えき}に つく`)}`;
   s += `<br>${rb(`${nm(RUN.dest)}{駅|えき}で {用事|ようじ}を すませたら、${nm(cfg.home)}{駅|えき}に もどってこよう。`)}`;
   $('#stMission').innerHTML = s;
   $('#bStart').innerHTML = rb('はじめる');
@@ -1335,13 +1403,20 @@ function renderSettings(){
     <div class="fr"><span class="lb">用事にかかる時間</span>${num('errandMin',5,180,'分')}</div>
     <p class="note">用事の内容は画面にそのまま表示されます。ひらがなで書くのがおすすめです。</p>`}</div>
   <div class="sec"><h3>電車と時刻表</h3>
+    <div class="fr"><span class="lb">時刻表に出す時間</span>${num('ttHours',1,6,'時間ぶん')}</div>
     <div class="fr"><span class="lb">時刻の刻み</span>${num('step',1,15,'分')}</div>
     <div class="fr"><span class="lb">電車の間隔（だいたい）</span>${num('headway',3,30,'分')}</div>
     <div class="fr"><span class="lb">となりの駅までの時間</span>${num('seg',1,10,'分')}</div>
     <div class="fr"><span class="lb">時刻表のパターン</span>${num('seed',1,99,'番')}</div>
-    <p class="note">時刻の刻みを5分にすると、発車時刻が5分ごと（0分・5分・10分…）にそろいます。となりの駅までの時間も刻みの倍数にすると、ほかの駅の時刻表もそろいます。急行はとなりの駅まで1分早く走ります。パターン番号を変えると別の時刻表になります。</p></div>
+    <p class="note">時刻の刻みを5分にすると、発車時刻が5分ごと（0分・5分・10分…）にそろいます。となりの駅までの時間も刻みの倍数にすると、ほかの駅の時刻表もそろいます。急行はとなりの駅まで1分早く走ります。パターン番号を変えると別の時刻表になります。<br>時刻表に出す時間は、今の時から何時間ぶんを表示するかです（3以上にすると、1つ前の時も表示します）。</p></div>
+  <div class="sec"><h3>ヒント</h3>
+    <div class="fr"><span class="lb">出発した時刻を灰色にする</span>${tg('hintPast','灰色')}</div>
+    <div class="fr"><span class="lb">時刻表に今の線を引く</span>${tg('hintNow','今の線')}</div>
+    <p class="note">どちらも時刻表の見た目だけが変わります。出発した電車も、今までどおり選ぶことができます。慣れてきたらOFFにしてください。</p></div>
   <div class="sec"><h3>すすみかた</h3>
     <div class="fr"><span class="lb">時計の速さ（1分が何秒か）</span>${num('secPerMin',1,20,'秒')}</div>
+    ${cfg.level === 'oneway' ? `<div class="fr"><span class="lb">時刻表を見ているときの速さ</span>${num('ttSecPerMin',1,30,'秒')}</div>
+    <p class="note">一方のみでは、時刻表で電車をえらんでいるあいだだけ、この速さになります。</p>` : ''}
     <div class="fr"><span class="lb">ドアが開いている時間</span>${num('dwell',3,30,'秒')}</div>
     <div class="fr"><span class="lb">案内が出るまでの時間</span>${num('guideDelay',1,20,'秒')}</div>
     <div class="fr"><span class="lb">はじめは時計を止めておく</span>${tg('startPaused','止める')}</div>

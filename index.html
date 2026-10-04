@@ -305,7 +305,7 @@ const DEFAULTS = {
   step:1, headway:10, seg:3, ttHours:4,
   secPerMin:3, dwell:4, guideDelay:2, seed:1,
   sound:true, startPaused:false,
-  hintPast:false, hintNow:false, ttSecPerMin:5
+  hintPast:false, hintNow:false, ttSecPerMin:5, arriveLead:1
 };
 function defCfg(){ return JSON.parse(JSON.stringify(DEFAULTS)); }
 function loadCfg(){
@@ -729,12 +729,20 @@ function startPlatEvent(list){
     const inX = side === 'top' ? 1.03 : -TL - 0.03, outX = side === 'top' ? -TL - 0.03 : 1.03;
     return {t, side, stop, inX, outX, x:inX, phase: stop ? 'enter' : 'pass', p:0, door:0, timer:0, playerIn:false};
   });
-  G.plat = {items, chimed:false};
+  // 時刻表の時刻には、もう電車がついてドアがひらいているようにする
+  let target = G.time;
+  items.forEach(i => { if(i.stop) target = Math.max(target, i.t.times[S]); });
+  G.plat = {items, chimed:false, clockLeft:target - G.time, clockRate:(target - G.time) / 3.2};
 }
+const arriveAt = (t, S) => t.times[S] - (t.stops[S] ? cfg.arriveLead : 0);
 const easeOut = p => 1 - (1-p)*(1-p), easeIn = p => p*p;
 
 function updatePlatEvent(dt){
   const P = G.plat; let allDone = true;
+  if(P.clockLeft > 0){
+    const step = Math.min(P.clockLeft, dt * P.clockRate);
+    G.time += step; P.clockLeft -= step;
+  }
   for(const it of P.items){
     if(it.phase === 'done') continue;
     allDone = false; it.p += dt;
@@ -745,7 +753,11 @@ function updatePlatEvent(dt){
       if(q >= 1){ it.phase = 'open'; it.p = 0; if(!P.chimed){ sfx('chime'); P.chimed = true; } }
     }else if(it.phase === 'open'){
       it.door = Math.min(1, it.p / 0.6);
-      if(it.p >= 0.6){ it.phase = 'dwell'; it.p = 0; it.timer = cfg.dwell; npcBoard(it); }
+      if(it.p >= 0.6){
+        it.phase = 'dwell'; it.p = 0; it.timer = cfg.dwell; npcBoard(it);
+        G.time = Math.max(G.time, it.t.times[G.station]);
+        if(G.plat.items.every(i => !i.stop || i.phase !== 'enter' && i.phase !== 'open')) G.plat.clockLeft = 0;
+      }
     }else if(it.phase === 'dwell'){
       it.timer -= dt;
       const pl = G.player;
@@ -807,9 +819,9 @@ function updatePlatform(dt){
   if(G.plat){ updatePlatEvent(dt); return; }
   const S = G.station;
   const list = platTrains(S).filter(t => !G.handled.has(t.id));
-  let nextT = Infinity; list.forEach(t => { nextT = Math.min(nextT, t.times[S]); });
+  let nextT = Infinity; list.forEach(t => { nextT = Math.min(nextT, arriveAt(t, S)); });
   advance(dt, nextT === Infinity ? undefined : nextT);
-  const due = list.filter(t => t.times[S] <= G.time + 1e-9);
+  const due = list.filter(t => arriveAt(t, S) <= G.time + 1e-9);
   if(due.length) startPlatEvent(due);
 }
 
@@ -1429,11 +1441,12 @@ function renderSettings(){
     <p class="note">用事の内容は画面にそのまま表示されます。ひらがなで書くのがおすすめです。</p>`}</div>
   <div class="sec"><h3>電車と時刻表</h3>
     <div class="fr"><span class="lb">時刻表に出す時間</span>${num('ttHours',1,6,'時間ぶん')}</div>
+    <div class="fr"><span class="lb">電車がホームに着く時刻</span>${num('arriveLead',0,5,'分前')}</div>
     <div class="fr"><span class="lb">時刻の刻み</span>${num('step',1,15,'分')}</div>
     <div class="fr"><span class="lb">電車の間隔（だいたい）</span>${num('headway',3,30,'分')}</div>
     <div class="fr"><span class="lb">となりの駅までの時間</span>${num('seg',1,10,'分')}</div>
     <div class="fr"><span class="lb">時刻表のパターン</span>${num('seed',1,99,'番')}</div>
-    <p class="note">時刻の刻みを5分にすると、発車時刻が5分ごと（0分・5分・10分…）にそろいます。となりの駅までの時間も刻みの倍数にすると、ほかの駅の時刻表もそろいます。急行はとなりの駅まで1分早く走ります。パターン番号を変えると別の時刻表になります。<br>時刻表に出す時間は、今の時から何時間ぶんを表示するかです（3以上にすると、1つ前の時も表示します）。</p></div>
+    <p class="note">時刻の刻みを5分にすると、発車時刻が5分ごと（0分・5分・10分…）にそろいます。となりの駅までの時間も刻みの倍数にすると、ほかの駅の時刻表もそろいます。急行はとなりの駅まで1分早く走ります。パターン番号を変えると別の時刻表になります。<br>電車は、時刻表の時刻の「〇分前」にホームに着き、時刻表の時刻にはドアがひらいています（0にすると、時刻表の時刻に着きはじめます）。<br>時刻表に出す時間は、今の時から何時間ぶんを表示するかです（3以上にすると、1つ前の時も表示します）。</p></div>
   <div class="sec"><h3>ヒント</h3>
     <div class="fr"><span class="lb">出発した時刻を灰色にする</span>${tg('hintPast','灰色')}</div>
     <div class="fr"><span class="lb">時刻表に今の線を引く</span>${tg('hintNow','今の線')}</div>

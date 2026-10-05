@@ -12,7 +12,7 @@
   --bg:#eaf1f6; --card:#ffffff; --ink:#1d2b3a; --sub:#566476; --line:#cfd9e3;
   --pri:#2563c9; --pri-l:#e4edfb; --loc:#1f8a70; --exp:#e2702a; --exp-l:#fdeee2;
   --warn:#fff6d8; --warn-b:#e0a82e;
-  --board:#1f2a36; --board-ink:#ffcf5c; --board-sub:#a9b8c8; --board-exp:#ff9a52;
+  --panel:#f4f7fa;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
@@ -79,7 +79,12 @@ input,select{font-family:inherit;font-size:20px;-webkit-user-select:text;user-se
 .clockbox{display:flex;align-items:center;gap:10px}
 #aclock{width:62px;height:62px}
 #dclock{font-size:34px;font-weight:700;min-width:6.2em;letter-spacing:.02em}
-.mission{flex:1;min-width:260px;font-size:19px;line-height:1.9}
+.mission{order:3;flex:1 1 100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:19px;line-height:1.9}
+.mission:empty{display:none}
+.gbtns{margin-left:auto}
+.selk{font-size:15px;color:var(--sub);border:2px solid var(--line);border-radius:8px;padding:0 8px;line-height:1.7}
+.seld{font-size:21px;font-weight:700}
+.mission #bToTT{margin-left:auto;font-size:17px;min-height:44px}
 .mission b{font-size:22px}
 .mission .goal{display:inline-block;padding:0 10px;border:2px solid var(--exp);border-radius:8px;color:#9a4513;font-size:17px;line-height:1.6}
 .mission .sub{font-size:16px;color:var(--sub);line-height:1.6}
@@ -123,22 +128,26 @@ body.paused #pauseChip{display:block}
 #ttLegend .tt-k{font-size:14px}
 
 /* ホーム */
-.selinfo{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:19px;line-height:1.9}
-.selinfo .sp{flex:1}
-.trackrow{display:flex;align-items:center;gap:10px;min-height:56px;padding:0 4px}
-.tlabel{font-size:19px;font-weight:700;line-height:1.9}
-.tlabel.sel{background:#fff;border:3px solid var(--pri);border-radius:10px;padding:0 10px}
-.tstat{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:2px 22px;background:var(--board);color:var(--board-ink);
-  border-radius:10px;padding:2px 14px;min-height:50px;font-variant-numeric:tabular-nums}
+.view#v-platform.on{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content;grid-template-rows:auto minmax(0,1fr) auto;gap:8px 12px;align-items:center}
+.trackrow{display:contents}
+.trackrow.top > *{grid-row:1}
+.trackrow.bot > *{grid-row:3}
+.trackrow .gone{display:none}
+.tlabel{font-size:18px;font-weight:700;line-height:1.9;padding-left:2px}
+.tstat{justify-self:start;max-width:100%;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 20px;background:var(--panel);
+  border:2px solid var(--line);border-radius:10px;padding:2px 14px;font-variant-numeric:tabular-nums}
 .tstat:empty{visibility:hidden}
-.bd{display:flex;align-items:baseline;gap:10px;line-height:1.9;white-space:nowrap}
-.bd-k{font-size:15px;color:var(--board-sub)}
-.bd-t{font-size:24px;font-weight:700}
-.bd-y{font-size:17px;font-weight:700}
-.bd-y.exp{color:var(--board-exp)}
-.bd rt{color:var(--board-sub)}
-.boardbtn{font-size:22px;min-height:56px;visibility:hidden}
-.platwrap{flex:1;min-height:0;border-radius:14px;overflow:hidden;border:2px solid var(--line)}
+.bd{display:flex;align-items:baseline;line-height:1.85;white-space:nowrap}
+.bd-k{width:64px;flex:none;font-size:15px;color:var(--sub)}
+.bd-t{width:116px;flex:none;font-weight:700;color:var(--ink)}
+.bd-t .bh{display:inline-block;width:30px;text-align:right}
+.bd.n1 .bd-t{font-size:24px}
+.bd.n2 .bd-t{font-size:20px;color:var(--sub)}
+.bd.n2 .bd-k{font-size:14px}
+.bd-y{min-width:2.6em;font-size:16px;font-weight:700;color:var(--sub)}
+.bd-y.exp{color:#b24f10}
+.boardbtn{font-size:21px;min-height:54px;visibility:hidden}
+.platwrap{grid-column:1 / -1;grid-row:2;height:100%;min-height:0;border-radius:14px;overflow:hidden;border:2px solid var(--line)}
 #platc{width:100%;height:100%;display:block}
 
 /* 乗車中 */
@@ -255,10 +264,9 @@ body.paused #pauseChip{display:block}
       <div id="ttLegend"></div>
     </div>
     <div id="v-platform" class="view">
-      <div class="selinfo"><div id="selInfo"></div><div class="sp"></div><button id="bToTT"></button></div>
-      <div class="trackrow"><div id="lblTop" class="tlabel"></div><div id="statTop" class="tstat"></div><button id="boardTop" class="boardbtn primary"></button></div>
+      <div class="trackrow top"><div id="lblTop" class="tlabel"></div><div id="statTop" class="tstat"></div><button id="boardTop" class="boardbtn primary"></button></div>
       <div class="platwrap"><canvas id="platc"></canvas></div>
-      <div class="trackrow"><div id="lblBot" class="tlabel"></div><div id="statBot" class="tstat"></div><button id="boardBot" class="boardbtn primary"></button></div>
+      <div class="trackrow bot"><div id="lblBot" class="tlabel"></div><div id="statBot" class="tstat"></div><button id="boardBot" class="boardbtn primary"></button></div>
     </div>
     <div id="v-ride" class="view">
       <div class="ridehead"><div id="rideNext"></div><div id="rideInfo"></div></div>
@@ -535,7 +543,11 @@ function setView(v){
 
 function renderMission(){
   let s = '';
-  if(G.phase === 'go' && cfg.goalOn) s = `<span class="goal">${fmt(goalTime())}までに つきたい</span>`;
+  if(G.view === 'platform' && G.selected){
+    s += `<span class="selk">えらんだ {電車|でんしゃ}</span><span class="seld">${trainDesc(G.selected.train, G.station)}</span>`;
+  }
+  if(G.phase === 'go' && cfg.goalOn) s += `<span class="goal">${fmt(goalTime())}までに つきたい</span>`;
+  if(G.view === 'platform') s += `<button id="bToTT">{時刻表|じこくひょう}を {見|み}る</button>`;
   $('#mission').innerHTML = rb(s);
 }
 
@@ -691,14 +703,13 @@ function goPlatform(){
 
 function renderPlatformLabels(){
   const S = G.station, sel = G.selected;
-  $('#selInfo').innerHTML = sel ? rb(`えらんだ {電車|でんしゃ}：${trainDesc(sel.train, S)}`) : '';
-  $('#bToTT').innerHTML = rb('{時刻表|じこくひょう}を {見|み}る');
   const ds = dirsAt(S);
   [['top',-1],['bot',1]].forEach(([side,dir]) => {
     const lbl = $(side === 'top' ? '#lblTop' : '#lblBot');
     const used = ds.includes(dir) && (dir > 0 ? S < N-1 : S > 0);
     lbl.innerHTML = used ? rb(panelHeader(dir, S)) : '';
     $(side === 'top' ? '#statTop' : '#statBot').innerHTML = '';
+    document.querySelectorAll(`.trackrow.${side} > *`).forEach(el => el.classList.toggle('gone', !used));
     const b = $(side === 'top' ? '#boardTop' : '#boardBot');
     b.innerHTML = rb('この {電車|でんしゃ}に のる');
     b.style.visibility = 'hidden';
@@ -846,7 +857,7 @@ function backToTT(){
   hideGuide(); G.selected = null; G.player = null;
   setView('station'); renderStation();
 }
-$('#bToTT').addEventListener('click', () => { if(G) backToTT(); });
+$('#mission').addEventListener('click', e => { if(G && e.target.closest('#bToTT')) backToTT(); });
 
 // ホームの案内板：その番線に、つぎに来る電車を2本まで出す
 function boardHTML(S, dir){
@@ -857,7 +868,9 @@ function boardHTML(S, dir){
     let y = '';
     if(cfg.level === 'express') y = t.type === 'express' ? '<span class="bd-y exp">{急行|きゅうこう}</span>' : '<span class="bd-y">ふつう</span>';
     if(!t.stops[S]) y += '<span class="bd-y">{通過|つうか}</span>';
-    return `<span class="bd"><span class="bd-k">${i === 0 ? 'つぎ' : 'そのつぎ'}</span><span class="bd-t">${fmt(t.times[S])}</span>${y}</span>`;
+    const m = Math.floor(t.times[S] + 1e-6), hh = Math.floor(m / 60) % 24, mm = ((m % 60) + 60) % 60;
+    const tm = `<span class="bh">${hh}</span>時${mm ? mm + '分' : ''}`;
+    return `<span class="bd n${i+1}"><span class="bd-k">${i === 0 ? 'つぎ' : 'そのつぎ'}</span><span class="bd-t">${tm}</span>${y}</span>`;
   }).join('');
 }
 function syncPlatformUI(){
@@ -1284,8 +1297,12 @@ function drawPerson(ctx, W, H, p, isP){
 }
 
 function drawPlatform(){
-  const {ctx, W, H} = fit($('#platc'));
-  ctx.clearRect(0, 0, W, H);
+  const {ctx, W, H:H0} = fit($('#platc'));
+  // たて長の画面では、ホームの絵がのびすぎないように高さをおさえて、まん中に置く
+  const H = Math.min(H0, W * 0.6), oy = (H0 - H) / 2;
+  ctx.clearRect(0, 0, W, H0);
+  ctx.fillStyle = '#dfe7ee'; ctx.fillRect(0, 0, W, H0);
+  ctx.save(); ctx.translate(0, oy);
   const S = G.station, ds = dirsAt(S);
   const useTop = ds.includes(-1) && S > 0, useBot = ds.includes(1) && S < N-1;
   drawTrackBand(ctx, W, H, 0.02, 0.32, useTop);
@@ -1306,6 +1323,7 @@ function drawPlatform(){
   if(G.plat) G.plat.items.forEach(it => drawTrain(ctx, W, H, it));
   G.npcs.forEach(n => { if(n.state !== 'gone') drawPerson(ctx, W, H, n, false); });
   if(G.player && G.player.state !== 'in') drawPerson(ctx, W, H, G.player, true);
+  ctx.restore();
 }
 
 const hash = i => { const s = Math.sin(i*12.9898 + 78.233) * 43758.5453; return s - Math.floor(s); };

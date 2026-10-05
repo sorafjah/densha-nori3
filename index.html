@@ -1281,8 +1281,10 @@ function drawTrain(ctx, W, H, it){
   // 種別は色つきの札に白い文字で
   let lf = fs0 * 0.85; while(lf > 11 && textW(ctx, lab, lf) + lf*1.3 > CAR*W*0.92) lf -= 1;
   const lw = textW(ctx, lab, lf) + lf*1.3, lt = isExp ? txtY - lf*1.45 : txtY - lf*1.1, lh = isExp ? lf*1.8 : lf*1.45;
-  ctx.fillStyle = isExp ? '#d4601a' : '#177a60'; rr(ctx, c1 - lw/2, lt, lw, lh, lh*0.28); ctx.fill();
-  drawRT(ctx, lab, c1, txtY, lf, 'center', '#ffffff');
+  const lc = isExp ? '#d4601a' : '#177a60';
+  ctx.fillStyle = '#ffffff'; rr(ctx, c1 - lw/2, lt, lw, lh, lh*0.28); ctx.fill();
+  ctx.strokeStyle = lc; ctx.lineWidth = Math.max(3, lf*0.13); ctx.stroke();
+  drawRT(ctx, lab, c1, txtY, lf, 'center', isExp ? '#b24f10' : '#146651');
   const dest = `${cfg.names[it.t.dir > 0 ? N-1 : 0]}ゆき`;
   let fs = fs0; while(fs > 12 && textW(ctx, dest, fs) > CAR*W*0.92) fs -= 1;
   drawRT(ctx, dest, c2, txtY, fs, 'center', '#1d2b3a');

@@ -12,6 +12,7 @@
   --bg:#eaf1f6; --card:#ffffff; --ink:#1d2b3a; --sub:#566476; --line:#cfd9e3;
   --pri:#2563c9; --pri-l:#e4edfb; --loc:#1f8a70; --exp:#e2702a; --exp-l:#fdeee2;
   --warn:#fff6d8; --warn-b:#e0a82e;
+  --board:#1f2a36; --board-ink:#ffcf5c; --board-sub:#a9b8c8; --board-exp:#ff9a52;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
@@ -80,7 +81,7 @@ input,select{font-family:inherit;font-size:20px;-webkit-user-select:text;user-se
 #dclock{font-size:34px;font-weight:700;min-width:6.2em;letter-spacing:.02em}
 .mission{flex:1;min-width:260px;font-size:19px;line-height:1.9}
 .mission b{font-size:22px}
-.mission .goal{display:inline-block;margin-left:10px;padding:0 10px;border:2px solid var(--exp);border-radius:8px;color:#9a4513;font-size:17px;line-height:1.6}
+.mission .goal{display:inline-block;padding:0 10px;border:2px solid var(--exp);border-radius:8px;color:#9a4513;font-size:17px;line-height:1.6}
 .mission .sub{font-size:16px;color:var(--sub);line-height:1.6}
 .gbtns{display:flex;gap:8px;flex-wrap:wrap}
 .gbtns button{font-size:17px}
@@ -127,7 +128,15 @@ body.paused #pauseChip{display:block}
 .trackrow{display:flex;align-items:center;gap:10px;min-height:56px;padding:0 4px}
 .tlabel{font-size:19px;font-weight:700;line-height:1.9}
 .tlabel.sel{background:#fff;border:3px solid var(--pri);border-radius:10px;padding:0 10px}
-.tstat{flex:1;font-size:18px;color:var(--sub);line-height:1.9}
+.tstat{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:2px 22px;background:var(--board);color:var(--board-ink);
+  border-radius:10px;padding:2px 14px;min-height:50px;font-variant-numeric:tabular-nums}
+.tstat:empty{visibility:hidden}
+.bd{display:flex;align-items:baseline;gap:10px;line-height:1.9;white-space:nowrap}
+.bd-k{font-size:15px;color:var(--board-sub)}
+.bd-t{font-size:24px;font-weight:700}
+.bd-y{font-size:17px;font-weight:700}
+.bd-y.exp{color:var(--board-exp)}
+.bd rt{color:var(--board-sub)}
 .boardbtn{font-size:22px;min-height:56px;visibility:hidden}
 .platwrap{flex:1;min-height:0;border-radius:14px;overflow:hidden;border:2px solid var(--line)}
 #platc{width:100%;height:100%;display:block}
@@ -187,6 +196,7 @@ body.paused #pauseChip{display:block}
 #modal.on{display:flex}
 .mcard{background:#fff;border-radius:18px;padding:22px 24px;width:min(620px,100%);border:2px solid var(--line)}
 #mMsg{font-size:24px;line-height:2.1;margin-bottom:16px}
+.mnote{margin-top:10px;padding:6px 14px;border-radius:10px;background:var(--warn);border:2px solid var(--warn-b);font-size:21px;line-height:2}
 #mBtns{display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end}
 #mBtns button{font-size:21px;min-height:58px}
 
@@ -305,7 +315,7 @@ const DEFAULTS = {
   step:1, headway:10, seg:3, ttHours:4,
   secPerMin:3, dwell:4, guideDelay:2, seed:1,
   sound:true, startPaused:false,
-  hintPast:false, hintNow:false, ttSecPerMin:5, arriveLead:1
+  hintPast:false, hintNow:false, hintLater:true, ttSecPerMin:5, arriveLead:1
 };
 function defCfg(){ return JSON.parse(JSON.stringify(DEFAULTS)); }
 function loadCfg(){
@@ -524,11 +534,8 @@ function setView(v){
 }
 
 function renderMission(){
-  const goal = goalTime();
-  let s = `${G.phase === 'go' ? '{行|い}き' : '{帰|かえ}り'}：<b>${nm(G.target)}{駅|えき}</b>へ {行|い}こう`;
-  if(G.phase === 'go' && cfg.goalOn) s += `<span class="goal">${fmt(goal)}までに つきたい</span>`;
-  if(G.view === 'ride') s += `<div class="sub">{今|いま}は {電車|でんしゃ}の なか</div>`;
-  else s += `<div class="sub">{今|いま}いる {駅|えき}：${nm(G.station)}{駅|えき}</div>`;
+  let s = '';
+  if(G.phase === 'go' && cfg.goalOn) s = `<span class="goal">${fmt(goalTime())}までに つきたい</span>`;
   $('#mission').innerHTML = rb(s);
 }
 
@@ -640,10 +647,19 @@ function renderStation(){
   });
 }
 
+// えらんだ電車より前に、のれる電車があるか
+function earlierTrain(t){
+  const S = G.station, fl = Math.floor(G.time + 1e-6), T = t.times[S];
+  if(T < fl) return false;
+  const toward = (G.target - S) * t.dir > 0;
+  return G.trains.some(o => o !== t && o.dir === t.dir && o.stops[S] && o.times[S] >= fl && o.times[S] < T && (!toward || o.stops[G.target]));
+}
 $('#ttWrap').addEventListener('click', e => {
   const b = e.target.closest('.tt-m'); if(!b || !G) return;
   const t = G.trains.find(x => x.id === +b.dataset.id); if(!t) return;
-  showModal(rb(`${trainDesc(t, G.station)}に のる？`), [
+  let msg = `${trainDesc(t, G.station)}に のる？`;
+  if(cfg.hintLater && earlierTrain(t)) msg += `<div class="mnote">この {電車|でんしゃ}より {先|さき}に {来|く}る {電車|でんしゃ}が あるよ。この {電車|でんしゃ}で いいかな？</div>`;
+  showModal(rb(msg), [
     {label: rb('えらびなおす'), fn: hideModal},
     {label: rb('この {電車|でんしゃ}に する'), cls:'primary', fn: () => { hideModal(); selectTrain(t); }}
   ]);
@@ -832,20 +848,24 @@ function backToTT(){
 }
 $('#bToTT').addEventListener('click', () => { if(G) backToTT(); });
 
+// ホームの案内板：その番線に、つぎに来る電車を2本まで出す
+function boardHTML(S, dir){
+  if(!dirsAt(S).includes(dir) || !(dir > 0 ? S < N-1 : S > 0)) return '';
+  const list = G.trains.filter(t => t.dir === dir && departs(t, S) && !G.handled.has(t.id))
+    .sort((a, b) => a.times[S] - b.times[S]).slice(0, 2);
+  return list.map((t, i) => {
+    let y = '';
+    if(cfg.level === 'express') y = t.type === 'express' ? '<span class="bd-y exp">{急行|きゅうこう}</span>' : '<span class="bd-y">ふつう</span>';
+    if(!t.stops[S]) y += '<span class="bd-y">{通過|つうか}</span>';
+    return `<span class="bd"><span class="bd-k">${i === 0 ? 'つぎ' : 'そのつぎ'}</span><span class="bd-t">${fmt(t.times[S])}</span>${y}</span>`;
+  }).join('');
+}
 function syncPlatformUI(){
   const pl = G.player;
   ['top','bot'].forEach(side => {
     const it = G.plat ? G.plat.items.find(i => i.side === side) : null;
-    let st = '';
-    if(it){
-      if(it.phase === 'pass') st = '{通過|つうか}します（とまりません）';
-      else if(it.phase === 'enter') st = '{電車|でんしゃ}が {来|き}ます';
-      else if(it.phase === 'open' || it.phase === 'dwell') st = 'ドアが ひらいたよ';
-      else if(it.phase === 'close') st = 'ドアが しまります';
-      else if(it.phase === 'leave') st = '{発車|はっしゃ}しました';
-    }
     const el = $(side === 'top' ? '#statTop' : '#statBot');
-    const h = rb(st); if(el.innerHTML !== h) el.innerHTML = h;
+    const h = rb(boardHTML(G.station, side === 'top' ? -1 : 1)); if(el.innerHTML !== h) el.innerHTML = h;
     const canBoard = it && it.stop && it.phase === 'dwell' && pl && pl.state === 'idle';
     const b = $(side === 'top' ? '#boardTop' : '#boardBot');
     const v = canBoard ? 'visible' : 'hidden'; if(b.style.visibility !== v) b.style.visibility = v;
@@ -1450,7 +1470,8 @@ function renderSettings(){
   <div class="sec"><h3>ヒント</h3>
     <div class="fr"><span class="lb">出発した時刻を灰色にする</span>${tg('hintPast','灰色')}</div>
     <div class="fr"><span class="lb">時刻表に今の線を引く</span>${tg('hintNow','今の線')}</div>
-    <p class="note">どちらも時刻表の見た目だけが変わります。出発した電車も、今までどおり選ぶことができます。慣れてきたらOFFにしてください。<br>レベルを選ぶと、一方のみは両方ON、上下線ありと急行もありは両方OFFになります。</p></div>
+    <div class="fr"><span class="lb">先の電車を選んだときに声をかける</span>${tg('hintLater','声かけ')}</div>
+    <p class="note">灰色と今の線は、時刻表の見た目だけが変わります。出発した電車も、今までどおり選ぶことができます。レベルを選ぶと、一方のみは両方ON、上下線ありと急行もありは両方OFFになります。<br>声かけは、もっと早く来る電車（行き先にとまる電車）があるのに、あとの電車を選んだときに「この電車でいいかな？」と出ます。そのまま選ぶこともできます。慣れてきたらOFFにしてください。</p></div>
   <div class="sec"><h3>すすみかた</h3>
     <div class="fr"><span class="lb">時計の速さ（1分が何秒か）</span>${num('secPerMin',1,20,'秒')}</div>
     ${cfg.level === 'oneway' ? `<div class="fr"><span class="lb">時刻表を見ているときの速さ</span>${num('ttSecPerMin',1,30,'秒')}</div>
